@@ -51,6 +51,11 @@ class FlutterMentions extends StatefulWidget {
     this.hideSuggestionList = false,
     this.onSuggestionVisibleChanged,
     this.suggestionListMargin,
+    this.suggestionState,
+    this.contentAfterTheLastTrigger,
+    this.textCustomHeader,
+    this.textDefaultHeader,
+    this.textNotFoundHeader,
   }) : super(key: key);
 
   final bool hideSuggestionList;
@@ -244,6 +249,13 @@ class FlutterMentions extends StatefulWidget {
   /// {@macro flutter.services.autofill.autofillHints}
   final Iterable<String>? autofillHints;
 
+  final Function(SuggestionState)? suggestionState;
+  final Function(String?)? contentAfterTheLastTrigger;
+
+  final String? textDefaultHeader;
+  final String? textNotFoundHeader;
+  final String? textCustomHeader;
+
   @override
   FlutterMentionsState createState() => FlutterMentionsState();
 }
@@ -253,8 +265,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
   ValueNotifier<bool> showSuggestions = ValueNotifier(false);
   LengthMap? _selectedMention;
   String _pattern = '';
+  late Mention mention;
 
-  Map<String, Annotation> mapToAnotation() {
+  SuggestionState suggestionState = SuggestionState.None;
+  bool get isShowDefaultHeader => suggestionState == SuggestionState.Ready;
+  bool get isShowNotFoundHeader => suggestionState == SuggestionState.NotFound;
+
+  Map<String, Annotation> mapToAnnotation() {
     final data = <String, Annotation>{};
 
     // Loop over all the mention items and generate a suggestions matching list
@@ -278,6 +295,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 id: e['id'],
                 display: e['display'],
                 trigger: element.trigger,
+                type: e['type'] as String?,
                 disableMarkup: element.disableMarkup,
                 markupBuilder: element.markupBuilder,
               )
@@ -286,6 +304,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 id: e['id'],
                 display: e['display'],
                 trigger: element.trigger,
+                type: e['type'] as String?,
                 disableMarkup: element.disableMarkup,
                 markupBuilder: element.markupBuilder,
               ),
@@ -322,7 +341,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
         TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
   }
 
-  void suggestionListerner() {
+  void suggestionListener() {
+    var _suggestionParam = <String>[];
     final cursorPos = controller!.selection.baseOffset;
 
     if (cursorPos >= 0) {
@@ -341,19 +361,74 @@ class FlutterMentionsState extends State<FlutterMentions> {
       final val = lengthMap.indexWhere((element) {
         _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
-        return element.end == cursorPos &&
-            element.str.toLowerCase().contains(RegExp(_pattern));
+        final parseStr = element.str.split(RegExp(_pattern));
+        // print(parseStr);
+        if (element.end == cursorPos) _suggestionParam = parseStr;
+        if (parseStr.length == 2) {
+          if (parseStr[0] != '' || parseStr[1] == '') return false;
+          return element.end == cursorPos &&
+              element.str.toLowerCase().contains(RegExp(_pattern));
+        }
+        return false;
       });
-
       showSuggestions.value = val != -1;
+
+      /// Suggestions State
+      if (_suggestionParam.length == 2) {
+        if (widget.contentAfterTheLastTrigger != null) {
+          widget.contentAfterTheLastTrigger!(_suggestionParam[1]);
+        }
+        if (_suggestionParam[0] != '') {
+          suggestionState = SuggestionState.Invalid;
+        } else if (_suggestionParam[1] == '') {
+          suggestionState = SuggestionState.Ready;
+        }
+      } else {
+        suggestionState = SuggestionState.None;
+      }
+
+      /// Content after the last trigger
+      if (widget.contentAfterTheLastTrigger != null) {
+        var lastAtSignIndex =
+            controller!.text.substring(0, cursorPos).lastIndexOf('@');
+        var _text = controller!.text.contains(RegExp(_pattern))
+            ? lastAtSignIndex == -1
+                ? ''
+                : controller!.text
+                    .substring(0, cursorPos)
+                    .split(RegExp('@'))
+                    .last
+            : '';
+        widget.contentAfterTheLastTrigger!(_text);
+      }
 
       if (widget.onSuggestionVisibleChanged != null) {
         widget.onSuggestionVisibleChanged!(val != -1);
       }
 
-      setState(() {
-        _selectedMention = val == -1 ? null : lengthMap[val];
-      });
+      _selectedMention = val == -1 ? null : lengthMap[val];
+
+      if (_selectedMention?.str != null) {
+        if (mention.data
+            .where((element) {
+              final ele = element['display'].toLowerCase();
+              final str = _selectedMention!.str
+                  .toLowerCase()
+                  .replaceAll(RegExp(_pattern), '');
+
+              return str.contains(ele) || ele.contains(str);
+            })
+            .toList()
+            .isNotEmpty) {
+          suggestionState = SuggestionState.Found;
+        } else {
+          suggestionState = SuggestionState.NotFound;
+        }
+      }
+      setState(() {});
+    }
+    if (widget.suggestionState != null) {
+      return widget.suggestionState!(suggestionState);
     }
   }
 
@@ -375,7 +450,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
-    final data = mapToAnotation();
+    final data = mapToAnnotation();
 
     controller = AnnotationEditingController(data);
 
@@ -384,7 +459,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     }
 
     // setup a listener to figure out which suggestions to show based on the trigger
-    controller!.addListener(suggestionListerner);
+    controller!.addListener(suggestionListener);
 
     controller!.addListener(inputListeners);
 
@@ -393,7 +468,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void dispose() {
-    controller!.removeListener(suggestionListerner);
+    controller!.removeListener(suggestionListener);
     controller!.removeListener(inputListeners);
 
     super.dispose();
@@ -403,17 +478,28 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
 
-    controller!.mapping = mapToAnotation();
+    controller!.mapping = mapToAnnotation();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Filter the list based on the selection
-    final list = _selectedMention != null
+  void setListMention() {
+    mention = _selectedMention != null
         ? widget.mentions.firstWhere(
             (element) => _selectedMention!.str.contains(element.trigger))
         : widget.mentions[0];
+  }
 
+  List<Map<String, dynamic>> get data => mention.data.where((element) {
+        final ele = element['display'].toLowerCase();
+        final str = _selectedMention!.str
+            .toLowerCase()
+            .replaceAll(RegExp(_pattern), '');
+
+        return ele == str ? false : ele.contains(str);
+      }).toList();
+  @override
+  Widget build(BuildContext context) {
+    // Filter the list based on the selection
+    setListMention();
     return Container(
       child: PortalEntry(
         portalAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
@@ -425,26 +511,39 @@ class FlutterMentionsState extends State<FlutterMentions> {
         portal: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
-            return show && !widget.hideSuggestionList
-                ? OptionList(
-                    margin: widget.suggestionListMargin,
-                    suggestionListHeight: widget.suggestionListHeight,
-                    suggestionBuilder: list.suggestionBuilder,
-                    suggestionListDecoration: widget.suggestionListDecoration,
-                    data: list.data.where((element) {
-                      final ele = element['display'].toLowerCase();
-                      final str = _selectedMention!.str
-                          .toLowerCase()
-                          .replaceAll(RegExp(_pattern), '');
+            if (isShowDefaultHeader ||
+                isShowNotFoundHeader ||
+                widget.textCustomHeader != null) {
+              return OptionList(
+                  margin: widget.suggestionListMargin,
+                  suggestionListHeight: widget.suggestionListHeight,
+                  suggestionListDecoration: widget.suggestionListDecoration,
+                  data: [],
+                  headerBuilder: mention.headerBuilder,
+                  header: widget.textCustomHeader != null
+                      ? widget.textCustomHeader!
+                      : isShowDefaultHeader
+                          ? widget.textDefaultHeader ?? 'Nhắc đến thành viên'
+                          : isShowNotFoundHeader
+                              ? widget.textNotFoundHeader ??
+                                  'Không tìm thấy kết quả nào'
+                              : '');
+            }
+            if (show && !widget.hideSuggestionList) {
+              return OptionList(
+                margin: widget.suggestionListMargin,
+                suggestionListHeight: widget.suggestionListHeight,
+                suggestionBuilder: mention.suggestionBuilder,
+                suggestionListDecoration: widget.suggestionListDecoration,
+                data: data,
+                onTap: (value) {
+                  addMention(value, mention);
+                  showSuggestions.value = false;
+                },
+              );
+            }
 
-                      return ele == str ? false : ele.contains(str);
-                    }).toList(),
-                    onTap: (value) {
-                      addMention(value, list);
-                      showSuggestions.value = false;
-                    },
-                  )
-                : Container();
+            return Container();
           },
         ),
         child: Row(

@@ -2,6 +2,8 @@ part of flutter_mentions;
 
 enum SuggestionPosition { Top, Bottom }
 
+enum SuggestionState { Ready, Found, NotFound, Invalid, None }
+
 class LengthMap {
   LengthMap({
     required this.start,
@@ -23,6 +25,7 @@ class Mention {
     this.suggestionBuilder,
     this.disableMarkup = false,
     this.markupBuilder,
+    this.headerBuilder,
   });
 
   /// A single character that will be used to trigger the suggestions.
@@ -46,10 +49,15 @@ class Mention {
 
   /// Build Custom suggestion widget using this builder.
   final Widget Function(Map<String, dynamic>)? suggestionBuilder;
+  final Widget Function(String)? headerBuilder;
 
   /// Allows to set custom markup for the mentioned item.
-  final String Function(String trigger, String mention, String value)?
-      markupBuilder;
+  final String Function(
+    String trigger,
+    String mention,
+    String value,
+    String? type,
+  )? markupBuilder;
 }
 
 class Annotation {
@@ -60,6 +68,7 @@ class Annotation {
     this.display,
     this.disableMarkup = false,
     this.markupBuilder,
+    this.type,
   });
 
   TextStyle? style;
@@ -67,6 +76,8 @@ class Annotation {
   String? display;
   String trigger;
   bool disableMarkup;
-  final String Function(String trigger, String mention, String value)?
+  String? type;
+  final String Function(
+          String trigger, String mention, String value, String? type)?
       markupBuilder;
 }
