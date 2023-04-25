@@ -376,7 +376,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
         final parseStr = element.str.split(RegExp(_pattern));
-        
+
         if (element.end == cursorPos) _suggestionParam = parseStr;
         if (parseStr.length == 2) {
           if (parseStr[0] != '' || parseStr[1] == '') return false;
@@ -389,7 +389,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
       /// Suggestions State
       if (_suggestionParam.length == 2) {
-        widget.contentAfterTheLastTrigger?.call(_suggestionParam[1]);
+        if (showSuggestions.value) {
+          widget.contentAfterTheLastTrigger?.call(_suggestionParam[1]);
+        }
 
         if (_suggestionParam[0] != '') {
           suggestionState = SuggestionState.Invalid;
