@@ -250,6 +250,7 @@ class FlutterMentions extends StatefulWidget {
   final Iterable<String>? autofillHints;
 
   final Function(SuggestionState)? suggestionState;
+
   final Function(String?)? contentAfterTheLastTrigger;
 
   final String? textDefaultHeader;
@@ -362,7 +363,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         _pattern = widget.mentions.map((e) => e.trigger).join('|');
 
         final parseStr = element.str.split(RegExp(_pattern));
-        // print(parseStr);
+        
         if (element.end == cursorPos) _suggestionParam = parseStr;
         if (parseStr.length == 2) {
           if (parseStr[0] != '' || parseStr[1] == '') return false;
@@ -375,32 +376,34 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
       /// Suggestions State
       if (_suggestionParam.length == 2) {
-        if (widget.contentAfterTheLastTrigger != null) {
-          widget.contentAfterTheLastTrigger!(_suggestionParam[1]);
-        }
+        widget.contentAfterTheLastTrigger?.call(_suggestionParam[1]);
+
         if (_suggestionParam[0] != '') {
           suggestionState = SuggestionState.Invalid;
         } else if (_suggestionParam[1] == '') {
           suggestionState = SuggestionState.Ready;
         }
       } else {
+        widget.contentAfterTheLastTrigger?.call('');
         suggestionState = SuggestionState.None;
       }
 
-      /// Content after the last trigger
-      if (widget.contentAfterTheLastTrigger != null) {
-        var lastAtSignIndex =
-            controller!.text.substring(0, cursorPos).lastIndexOf('@');
-        var _text = controller!.text.contains(RegExp(_pattern))
-            ? lastAtSignIndex == -1
-                ? ''
-                : controller!.text
-                    .substring(0, cursorPos)
-                    .split(RegExp('@'))
-                    .last
-            : '';
-        widget.contentAfterTheLastTrigger!(_text);
-      }
+      // TODO: Sang Pham will fix this later
+      // /// Content after the last trigger
+      // if (widget.contentAfterTheLastTrigger != null) {
+      //   var lastAtSignIndex =
+      //       controller!.text.substring(0, cursorPos).lastIndexOf('@');
+      //   var _text = controller!.text.contains(RegExp(_pattern))
+      //       ? lastAtSignIndex == -1
+      //           ? ''
+      //           : controller!.text
+      //               .substring(0, cursorPos)
+      //               .split(RegExp('@'))
+      //               .last
+      //       : '';
+      //   widget.contentAfterTheLastTrigger!(_text);
+      //   print('Text $_text');
+      // }
 
       if (widget.onSuggestionVisibleChanged != null) {
         widget.onSuggestionVisibleChanged!(val != -1);
