@@ -48,7 +48,6 @@ class FlutterMentions extends StatefulWidget {
     this.scrollController,
     this.autofillHints,
     this.appendSpaceOnAdd = true,
-    this.hideSuggestionList = false,
     this.onSuggestionVisibleChanged,
     this.suggestionListMargin,
     this.suggestionState,
@@ -57,8 +56,6 @@ class FlutterMentions extends StatefulWidget {
     this.textDefaultHeader,
     this.textNotFoundHeader,
   }) : super(key: key);
-
-  final bool hideSuggestionList;
 
   /// default text for the Mention Input.
   final String? defaultText;
@@ -266,10 +263,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
   LengthMap? _selectedMention;
   String _pattern = '';
   late Mention mention;
+  late FocusNode _focusNode;
+  bool hasFocus = false;
 
   SuggestionState suggestionState = SuggestionState.None;
   bool get isShowDefaultHeader => suggestionState == SuggestionState.Ready;
   bool get isShowNotFoundHeader => suggestionState == SuggestionState.NotFound;
+
+  bool get isShowHeader =>
+      isShowDefaultHeader ||
+      isShowNotFoundHeader ||
+      widget.textCustomHeader != null;
 
   Map<String, Annotation> mapToAnnotation() {
     final data = <String, Annotation>{};
@@ -339,6 +343,15 @@ class FlutterMentionsState extends State<FlutterMentions> {
     if (widget.appendSpaceOnAdd) nextCursorPosition++;
     controller!.selection =
         TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
+  }
+
+  void initFocusNode() {
+    _focusNode = widget.focusNode ?? FocusNode();
+    _focusNode.addListener(() {
+      setState(() {
+        hasFocus = _focusNode.hasFocus;
+      });
+    });
   }
 
   void suggestionListener() {
@@ -462,7 +475,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller!.addListener(suggestionListener);
 
     controller!.addListener(inputListeners);
-
+    initFocusNode();
     super.initState();
   }
 
@@ -470,7 +483,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void dispose() {
     controller!.removeListener(suggestionListener);
     controller!.removeListener(inputListeners);
-
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -511,36 +524,37 @@ class FlutterMentionsState extends State<FlutterMentions> {
         portal: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
-            if (isShowDefaultHeader ||
-                isShowNotFoundHeader ||
-                widget.textCustomHeader != null) {
-              return OptionList(
+            if (hasFocus) {
+              if (isShowHeader) {
+                return OptionList(
+                    margin: widget.suggestionListMargin,
+                    suggestionListHeight: widget.suggestionListHeight,
+                    suggestionListDecoration: widget.suggestionListDecoration,
+                    data: [],
+                    headerBuilder: mention.headerBuilder,
+                    header: widget.textCustomHeader != null
+                        ? widget.textCustomHeader!
+                        : isShowDefaultHeader
+                            ? widget.textDefaultHeader ?? 'Nhắc đến thành viên'
+                            : isShowNotFoundHeader
+                                ? widget.textNotFoundHeader ??
+                                    'Không tìm thấy kết quả nào'
+                                : '');
+              }
+
+              if (show) {
+                return OptionList(
                   margin: widget.suggestionListMargin,
                   suggestionListHeight: widget.suggestionListHeight,
+                  suggestionBuilder: mention.suggestionBuilder,
                   suggestionListDecoration: widget.suggestionListDecoration,
-                  data: [],
-                  headerBuilder: mention.headerBuilder,
-                  header: widget.textCustomHeader != null
-                      ? widget.textCustomHeader!
-                      : isShowDefaultHeader
-                          ? widget.textDefaultHeader ?? 'Nhắc đến thành viên'
-                          : isShowNotFoundHeader
-                              ? widget.textNotFoundHeader ??
-                                  'Không tìm thấy kết quả nào'
-                              : '');
-            }
-            if (show && !widget.hideSuggestionList) {
-              return OptionList(
-                margin: widget.suggestionListMargin,
-                suggestionListHeight: widget.suggestionListHeight,
-                suggestionBuilder: mention.suggestionBuilder,
-                suggestionListDecoration: widget.suggestionListDecoration,
-                data: data,
-                onTap: (value) {
-                  addMention(value, mention);
-                  showSuggestions.value = false;
-                },
-              );
+                  data: data,
+                  onTap: (value) {
+                    addMention(value, mention);
+                    showSuggestions.value = false;
+                  },
+                );
+              }
             }
 
             return Container();
@@ -554,7 +568,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 maxLines: widget.maxLines,
                 minLines: widget.minLines,
                 maxLength: widget.maxLength,
-                focusNode: widget.focusNode,
+                focusNode: _focusNode,
                 keyboardType: widget.keyboardType,
                 keyboardAppearance: widget.keyboardAppearance,
                 textInputAction: widget.textInputAction,
