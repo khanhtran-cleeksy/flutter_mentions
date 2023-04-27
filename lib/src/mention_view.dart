@@ -533,7 +533,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // setListMention();
+    setListMention();
   }
 
   @override
@@ -541,7 +541,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     super.didUpdateWidget(widget);
 
     controller!.mapping = mapToAnnotation();
-    // setListMention();
+    setListMention();
   }
 
   @override
