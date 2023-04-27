@@ -80,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
           TextButton(
             child: Text('Get Text'),
             onPressed: () {
-              markupText = key.currentState!.controller!.markupText;
+              // markupText = key.currentState!.controller!.markupText;
               setState(() {});
             },
           ),
@@ -103,7 +103,6 @@ class _MyHomePageState extends State<MyHomePage> {
               decoration: InputDecoration(hintText: 'hello'),
               suggestionState: (_) {
                 state = _;
-                setState(() {});
               },
               onSearchChanged: (trigger, value) async {
                 dataMentions = [];

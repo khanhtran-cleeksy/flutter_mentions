@@ -309,19 +309,19 @@ class FlutterMentionsState extends State<FlutterMentions> {
               ),
       );
     });
-    // TODO: Xóa các mention khỏi data khi không có trong text
-    clearMentionsTemp();
+
     return data;
   }
 
   void clearMentionsTemp() {
-    _mentionsTemp.where((_) => _.matchAll).forEach((m) {
-      m.data = m.data
-          .where(
-            (d) => controller!.text.contains(d['display']),
-          )
-          .toList();
+    _mentionsTemp.forEach((m) {
+      m.data = m.data.where(
+        (d) {
+          return controller!.text.contains('${m.trigger}${d['display']}');
+        },
+      ).toList();
     });
+    controller!.mapping = mapToAnnotation();
   }
 
   void addMention(Map<String, dynamic> value, Mention list) {
@@ -360,7 +360,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
           _list.data = [value];
           _mentionsTemp.add(_list);
         }
-        setState(() {});
+        controller!.mapping = mapToAnnotation();
       }
     }
 
@@ -423,13 +423,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
     if (isChangeShowSuggestions) {
       // if mention found then show the suggestions
       showSuggestions.value = val != -1;
-    } else if (_selectedMention != null && data.isEmpty) {
-      showSuggestions.value = false;
     }
     _selectedMention = val == -1 ? null : lengthMap[val];
   }
 
   Future<void> inputListeners({bool skipSearch = false}) async {
+    // TODO: Xóa các mention khỏi data khi không có trong text
+    clearMentionsTemp();
     suggestionListener(isChangeShowSuggestions: widget.onSearchChanged == null);
 
     if (widget.onChanged != null) {
@@ -459,9 +459,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
     }
 
     if (widget.suggestionState != null) {
-      return widget.suggestionState!(suggestionState);
+      widget.suggestionState!(suggestionState);
     }
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   @override
@@ -495,6 +495,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   List<Map<String, dynamic>> get data => mention.data.where((element) {
         final ele = element['display'].toLowerCase();
+        if (_selectedMention == null) return false;
         final str = _selectedMention!.str
             .toLowerCase()
             .replaceAll(RegExp(_pattern), '');
@@ -514,7 +515,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
     controller!.mapping = mapToAnnotation();
     setListMention();
-    if (mounted && controller?.text != '') inputListeners(skipSearch: true);
+    inputListeners(skipSearch: true);
   }
 
   @override
