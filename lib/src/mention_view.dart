@@ -447,7 +447,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     if (widget.suggestionState != null) {
       widget.suggestionState!(suggestionState);
     }
-    if (mounted) setState(() {});
+    // if (mounted) setState(() {});
   }
 
   void inputListener() {
