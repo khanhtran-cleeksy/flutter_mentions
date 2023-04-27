@@ -36,7 +36,7 @@ class Mention {
   /// You need to provide two properties `id` & `display` both are [String]
   /// You can also have any custom properties as you like to build custom suggestion
   /// widget.
-  final List<Map<String, dynamic>> data;
+   List<Map<String, dynamic>> data;
 
   /// Style for the mention item in Input.
   final TextStyle? style;
@@ -58,6 +58,7 @@ class Mention {
     String value,
     String? type,
   )? markupBuilder;
+
 }
 
 class Annotation {

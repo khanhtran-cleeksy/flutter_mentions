@@ -264,6 +264,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   LengthMap? _selectedMention;
   String _pattern = '';
   late Mention mention;
+  final List<Mention> _mentionsTemp = [];
   late FocusNode _focusNode;
   bool hasFocus = false;
 
@@ -280,7 +281,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     final data = <String, Annotation>{};
 
     // Loop over all the mention items and generate a suggestions matching list
-    widget.mentions.forEach((element) {
+    _mentionsTemp.forEach((element) {
       // if matchAll is set to true add a general regex patteren to match with
       if (element.matchAll) {
         data['${element.trigger}([A-Za-z0-9])*'] = Annotation(
@@ -319,7 +320,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     return data;
   }
 
-  void addMention(Map<String, dynamic> value, [Mention? list]) {
+  void addMention(Map<String, dynamic> value, Mention list) {
     final selectedMention = _selectedMention!;
 
     setState(() {
@@ -337,6 +338,27 @@ class FlutterMentionsState extends State<FlutterMentions> {
     );
 
     if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
+    if (!_mentionsTemp.contains(value)) {
+      Map<String, dynamic>? mentionTemp;
+      list.data.forEach((element) {
+        if (element['id'] == value['id']) {
+          mentionTemp = element;
+        }
+      });
+      if (mentionTemp != null) {
+        try {
+          _mentionsTemp
+              .firstWhere((_) => _.trigger == list.trigger)
+              .data
+              .add(value);
+        } catch (e) {
+          var _list = list;
+          _list.data = [value];
+          _mentionsTemp.add(_list);
+        }
+        setState(() {});
+      }
+    }
 
     // Move the cursor to next position after the new mentioned item.
     var nextCursorPosition =
@@ -492,13 +514,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(widget) {
-    super.didUpdateWidget(widget);
-
-    controller!.mapping = mapToAnnotation();
-  }
-
   void setListMention() {
     mention = _selectedMention != null
         ? widget.mentions.firstWhere(
@@ -514,6 +529,21 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
         return ele == str ? false : ele.contains(str);
       }).toList();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // setListMention();
+  }
+
+  @override
+  void didUpdateWidget(widget) {
+    super.didUpdateWidget(widget);
+
+    controller!.mapping = mapToAnnotation();
+    // setListMention();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Filter the list based on the selection
@@ -529,7 +559,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         portal: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
-            if (hasFocus) {
+            if (hasFocus || true) {
               if (isShowHeader) {
                 return OptionList(
                     margin: widget.suggestionListMargin,

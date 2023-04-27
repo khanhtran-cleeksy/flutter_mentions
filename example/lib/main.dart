@@ -33,6 +33,38 @@ class _MyHomePageState extends State<MyHomePage> {
   GlobalKey<FlutterMentionsState> key = GlobalKey<FlutterMentionsState>();
   SuggestionState state = SuggestionState.None;
   String? c = '';
+  String? markupText = '';
+  List<Map<String, dynamic>> dataMentions = [
+    {
+      'id': '61as61fsa',
+      'display': 'Long T1',
+      'full_name': 'Fayeed Pawaskar',
+      'photo':
+          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
+    },
+    {
+      'id': '61asasgasgsag6a',
+      'display': 'Khải T2',
+      'full_name': 'khaled',
+      'style': TextStyle(color: Colors.purple),
+      'photo':
+          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
+    },
+    {
+      'id': 'asfgasga41',
+      'display': 'Sang T3',
+      'full_name': 'Mark Twain',
+      'photo':
+          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
+    },
+    {
+      'id': 'asfsaf451a',
+      'display': 'Nguyệt T4',
+      'full_name': 'Jhon Legend',
+      'photo':
+          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
+    },
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +79,16 @@ class _MyHomePageState extends State<MyHomePage> {
           TextButton(
             child: Text('Get Text'),
             onPressed: () {
-              print(key.currentState!.controller!.markupText);
+              markupText = key.currentState!.controller!.markupText;
+              setState(() {});
+            },
+          ),
+          Text('Markup Text: $markupText'),
+          TextButton(
+            child: Text('Remove Data Mention'),
+            onPressed: () {
+              dataMentions = [];
+              setState(() {});
             },
           ),
           Container(
@@ -74,37 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: TextStyle(
                       color: Colors.amber,
                     ),
-                    data: [
-                      {
-                        'id': '61as61fsa',
-                        'display': 'fayeedP',
-                        'full_name': 'Fayeed Pawaskar',
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                      {
-                        'id': '61asasgasgsag6a',
-                        'display': 'khaled',
-                        'full_name': 'khaled',
-                        'style': TextStyle(color: Colors.purple),
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                      {
-                        'id': 'asfgasga41',
-                        'display': 'Tất cả',
-                        'full_name': 'Mark Twain',
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                      {
-                        'id': 'asfsaf451a',
-                        'display': 'JhonL',
-                        'full_name': 'Jhon Legend',
-                        'photo':
-                            'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
-                      },
-                    ],
+                    data: dataMentions,
                     matchAll: false,
                     suggestionBuilder: (data) {
                       return Container(
