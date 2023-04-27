@@ -422,18 +422,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
     _selectedMention = val == -1 ? null : lengthMap[val];
   }
 
-  Future<void> inputListeners({bool skipSearch = false}) async {
-    // TODO: Xóa các mention khỏi data khi không có trong text
+  Future<void> suggestionStateListeners({bool skipSearch = false}) async {
     clearMentionsTemp();
     suggestionListener(isChangeShowSuggestions: widget.onSearchChanged == null);
-
-    if (widget.onChanged != null && controller != null) {
-      widget.onChanged!(controller!.text);
-    }
-
-    if (widget.onMarkupChanged != null && controller != null) {
-      widget.onMarkupChanged!(controller!.markupText);
-    }
 
     if (_selectedMention?.str != null) {
       final str = _selectedMention!.str.toLowerCase();
@@ -459,6 +450,12 @@ class FlutterMentionsState extends State<FlutterMentions> {
     if (mounted) setState(() {});
   }
 
+  void inputListener() {
+    widget.onChanged!(controller!.text);
+
+    widget.onMarkupChanged!(controller!.markupText);
+  }
+
   @override
   void initState() {
     final data = mapToAnnotation();
@@ -469,14 +466,16 @@ class FlutterMentionsState extends State<FlutterMentions> {
       controller!.text = widget.defaultText!;
     }
 
-    controller!.addListener(inputListeners);
+    controller!.addListener(suggestionStateListeners);
+    controller!.addListener(inputListener);
     initFocusNode();
     super.initState();
   }
 
   @override
   void dispose() {
-    controller!.removeListener(inputListeners);
+    controller!.removeListener(suggestionStateListeners);
+    controller!.removeListener(inputListener);
     _focusNode.dispose();
     super.dispose();
   }
@@ -510,7 +509,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
     controller!.mapping = mapToAnnotation();
     setListMention();
-    inputListeners(skipSearch: true);
+    suggestionStateListeners(skipSearch: true);
   }
 
   @override
