@@ -427,11 +427,11 @@ class FlutterMentionsState extends State<FlutterMentions> {
     clearMentionsTemp();
     suggestionListener(isChangeShowSuggestions: widget.onSearchChanged == null);
 
-    if (widget.onChanged != null) {
+    if (widget.onChanged != null && controller != null) {
       widget.onChanged!(controller!.text);
     }
 
-    if (widget.onMarkupChanged != null) {
+    if (widget.onMarkupChanged != null && controller != null) {
       widget.onMarkupChanged!(controller!.markupText);
     }
 
