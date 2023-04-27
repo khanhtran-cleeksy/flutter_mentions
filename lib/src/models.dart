@@ -2,7 +2,7 @@ part of flutter_mentions;
 
 enum SuggestionPosition { Top, Bottom }
 
-enum SuggestionState { Ready, Found, NotFound, Invalid, None }
+enum SuggestionState { Ready, Found, NotFound, None }
 
 class LengthMap {
   LengthMap({
