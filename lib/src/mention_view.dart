@@ -343,25 +343,20 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
     if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
     if (!_mentionsTemp.contains(value)) {
-      Map<String, dynamic>? mentionTemp;
       list.data.forEach((element) {
         if (element['id'] == value['id']) {
-          mentionTemp = element;
+          try {
+            _mentionsTemp
+                .firstWhere((_) => _.trigger == list.trigger)
+                .data
+                .add(value);
+          } catch (e) {
+            var mentionTemp = list.copyWith(data: [value]);
+            _mentionsTemp.add(mentionTemp);
+          }
+          controller!.mapping = mapToAnnotation();
         }
       });
-      if (mentionTemp != null) {
-        try {
-          _mentionsTemp
-              .firstWhere((_) => _.trigger == list.trigger)
-              .data
-              .add(value);
-        } catch (e) {
-          var _list = list;
-          _list.data = [value];
-          _mentionsTemp.add(_list);
-        }
-        controller!.mapping = mapToAnnotation();
-      }
     }
 
     // Move the cursor to next position after the new mentioned item.
