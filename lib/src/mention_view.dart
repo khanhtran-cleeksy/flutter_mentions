@@ -262,6 +262,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
   bool hasFocus = false;
 
   SuggestionState suggestionState = SuggestionState.None;
+  set setSuggestionState(SuggestionState state) {
+    if (suggestionState == state) return;
+    setState(() {
+      suggestionState = state;
+    });
+  }
+
   bool get isShowDefaultHeader => suggestionState == SuggestionState.Ready;
   bool get isShowNotFoundHeader => suggestionState == SuggestionState.NotFound;
 
@@ -410,9 +417,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
     });
 
     if (_suggestionParam.length == 2 && _suggestionParam[1] == '') {
-      suggestionState = SuggestionState.Ready;
+      setSuggestionState = SuggestionState.Ready;
     } else {
-      suggestionState = SuggestionState.None;
+      setSuggestionState = SuggestionState.None;
     }
 
     if (isChangeShowSuggestions) {
@@ -438,9 +445,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
       }
 
       if (data.isNotEmpty) {
-        suggestionState = SuggestionState.Found;
+        setSuggestionState = SuggestionState.Found;
       } else {
-        suggestionState = SuggestionState.NotFound;
+        setSuggestionState = SuggestionState.NotFound;
       }
     }
 
