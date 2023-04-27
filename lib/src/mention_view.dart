@@ -423,7 +423,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     if (isChangeShowSuggestions) {
       // if mention found then show the suggestions
       showSuggestions.value = val != -1;
-    } else if (data.isEmpty) {
+    } else if (_selectedMention != null && data.isEmpty) {
       showSuggestions.value = false;
     }
     _selectedMention = val == -1 ? null : lengthMap[val];
@@ -514,7 +514,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
     controller!.mapping = mapToAnnotation();
     setListMention();
-    inputListeners(skipSearch: true);
+    if (mounted && controller?.text != '') inputListeners(skipSearch: true);
   }
 
   @override
