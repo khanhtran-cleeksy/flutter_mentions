@@ -270,7 +270,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
     });
   }
 
-  bool get isShowDefaultHeader => suggestionState == SuggestionState.Ready;
+  bool get isShowDefaultHeader =>
+      suggestionState == SuggestionState.Ready;
   bool get isShowNotFoundHeader => suggestionState == SuggestionState.NotFound;
 
   bool get isShowHeader =>
@@ -421,9 +422,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
       return false;
     });
 
-    if (_suggestionParam.length == 2 && _suggestionParam[1] == '') {
-      setSuggestionState = SuggestionState.Ready;
+    if (_suggestionParam.length == 2) {
+      if (_suggestionParam[1] == '') {
+        print(SuggestionState.Ready);
+        setSuggestionState = SuggestionState.Ready;
+      }
     } else {
+      print(SuggestionState.None);
       setSuggestionState = SuggestionState.None;
     }
     _selectedMention = val == -1 ? null : lengthMap[val];
@@ -454,9 +459,20 @@ class FlutterMentionsState extends State<FlutterMentions> {
           final str = _selectedMention!.str.toLowerCase();
           var content = str.substring(1);
           await suggestionStateListeners(str[0], content);
+          data = mention.data.where((element) {
+            final ele = element['display'].toLowerCase();
+            if (_selectedMention == null) return false;
+            final str = _selectedMention!.str
+                .toLowerCase()
+                .replaceAll(RegExp(_pattern), '');
+
+            return ele == str ? false : ele.contains(str);
+          }).toList();
           if (data.isNotEmpty) {
+            print(SuggestionState.Found);
             setSuggestionState = SuggestionState.Found;
           } else {
+            print(SuggestionState.NotFound);
             setSuggestionState = SuggestionState.NotFound;
           }
         },
@@ -527,15 +543,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         : widget.mentions[0];
   }
 
-  List<Map<String, dynamic>> get data => mention.data.where((element) {
-        final ele = element['display'].toLowerCase();
-        if (_selectedMention == null) return false;
-        final str = _selectedMention!.str
-            .toLowerCase()
-            .replaceAll(RegExp(_pattern), '');
-
-        return ele == str ? false : ele.contains(str);
-      }).toList();
+  List<Map<String, dynamic>> data = [];
 
   @override
   void didChangeDependencies() {
@@ -553,45 +561,29 @@ class FlutterMentionsState extends State<FlutterMentions> {
         childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
             ? Alignment.bottomCenter
             : Alignment.topCenter,
-        portal: ValueListenableBuilder(
-          valueListenable: showSuggestions,
-          builder: (BuildContext context, bool show, Widget? child) {
-            if (hasFocus) {
-              if (isShowHeader) {
-                return OptionList(
-                    margin: widget.suggestionListMargin,
-                    suggestionListHeight: widget.suggestionListHeight,
-                    suggestionListDecoration: widget.suggestionListDecoration,
-                    data: [],
-                    headerBuilder: mention.headerBuilder,
-                    header: widget.textCustomHeader != null
+        portal: hasFocus && suggestionState != SuggestionState.None
+            ? OptionList(
+                margin: widget.suggestionListMargin,
+                suggestionListHeight: widget.suggestionListHeight,
+                suggestionListDecoration: widget.suggestionListDecoration,
+                suggestionBuilder: mention.suggestionBuilder,
+                data: data,
+                headerBuilder: mention.headerBuilder,
+                onTap: (value) {
+                  addMention(value, mention);
+                  showSuggestions.value = false;
+                },
+                header: isShowHeader
+                    ? widget.textCustomHeader != null
                         ? widget.textCustomHeader!
                         : isShowDefaultHeader
                             ? widget.textDefaultHeader ?? 'Nhắc đến thành viên'
                             : isShowNotFoundHeader
                                 ? widget.textNotFoundHeader ??
                                     'Không tìm thấy kết quả nào'
-                                : '');
-              }
-
-              if (show) {
-                return OptionList(
-                  margin: widget.suggestionListMargin,
-                  suggestionListHeight: widget.suggestionListHeight,
-                  suggestionBuilder: mention.suggestionBuilder,
-                  suggestionListDecoration: widget.suggestionListDecoration,
-                  data: data,
-                  onTap: (value) {
-                    addMention(value, mention);
-                    showSuggestions.value = false;
-                  },
-                );
-              }
-            }
-
-            return Container();
-          },
-        ),
+                                : null
+                    : null)
+            : SizedBox(),
         child: Row(
           children: [
             ...widget.leading,
