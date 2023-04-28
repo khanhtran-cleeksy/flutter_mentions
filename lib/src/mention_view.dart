@@ -59,7 +59,7 @@ class FlutterMentions extends StatefulWidget {
   final String? defaultText;
 
   /// List of Mention that the user is allowed to triggered
-  final List<Mention> mentions;
+  List<Mention> mentions;
 
   /// Leading widgets to show before teh Input box, helps preseve the size
   /// size for the Portal widget size.
@@ -90,7 +90,8 @@ class FlutterMentions extends StatefulWidget {
   /// This is an optional porperty.
   final ValueChanged<String>? onMarkupChanged;
 
-  final Future<void> Function(String trigger, String value)? onSearchChanged;
+  final Future<List<Map<String, dynamic>>> Function(
+      String trigger, String value)? onSearchChanged;
 
   /// Decoration for the Suggestion list.
   final BoxDecoration? suggestionListDecoration;
@@ -421,16 +422,18 @@ class FlutterMentionsState extends State<FlutterMentions> {
     } else {
       setSuggestionState = SuggestionState.None;
     }
+    _selectedMention = val == -1 ? null : lengthMap[val];
 
     if (isChangeShowSuggestions) {
       // if mention found then show the suggestions
       showSuggestions.value = val != -1;
     }
-    _selectedMention = val == -1 ? null : lengthMap[val];
   }
 
   Future<void> suggestionStateListeners({bool skipSearch = false}) async {
     clearMentionsTemp();
+
+    // Get keyword to search
     suggestionListener(isChangeShowSuggestions: widget.onSearchChanged == null);
 
     if (_selectedMention?.str != null) {
@@ -439,8 +442,15 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
       if (content != '') {
         if (widget.onSearchChanged != null && !skipSearch) {
-          await widget.onSearchChanged!(str[0], content);
-          suggestionListener(isChangeShowSuggestions: true);
+          try {
+            final mentionDataTemp =
+                await widget.onSearchChanged!(str[0], content);
+            // If data is not null then update the data to the mention
+            if (mentionDataTemp.isNotEmpty) {
+              mention.data = mentionDataTemp;
+              suggestionListener(isChangeShowSuggestions: true);
+            }
+          } catch (e) {}
         }
       }
 
@@ -454,13 +464,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
     if (widget.suggestionState != null) {
       widget.suggestionState!(suggestionState);
     }
-    // if (mounted) setState(() {});
+    if (mounted) setState(() {});
   }
 
   void inputListener() {
-    widget.onChanged!(controller!.text);
-
-    widget.onMarkupChanged!(controller!.markupText);
+    if (controller == null) return;
+    if (widget.onChanged != null) {
+      widget.onChanged!(controller!.text);
+    }
+    if (widget.onMarkupChanged != null) {
+      widget.onMarkupChanged!(controller!.markupText);
+    }
   }
 
   @override
@@ -507,16 +521,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    controller!.mapping = mapToAnnotation();
     setListMention();
   }
 
   @override
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
-
-    controller!.mapping = mapToAnnotation();
-    setListMention();
-    suggestionStateListeners(skipSearch: true);
   }
 
   @override
@@ -552,7 +563,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                                 : '');
               }
 
-              if (show && data.isNotEmpty) {
+              if (show) {
                 return OptionList(
                   margin: widget.suggestionListMargin,
                   suggestionListHeight: widget.suggestionListHeight,
