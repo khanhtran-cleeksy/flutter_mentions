@@ -34,7 +34,8 @@ class _MyHomePageState extends State<MyHomePage> {
   SuggestionState state = SuggestionState.None;
   String? c = '';
   String? markupText = '';
-  List<Map<String, dynamic>> dataMentions = [
+  List<Map<String, dynamic>> dataMentions = [];
+  List<Map<String, dynamic>> dataMentionsTest = [
     {
       'id': '61as61fsa',
       'display': 'Long T1',
@@ -79,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
           TextButton(
             child: Text('Get Text'),
             onPressed: () {
-              markupText = key.currentState!.controller!.markupText;
+              // markupText = key.currentState!.controller!.markupText;
               setState(() {});
             },
           ),
@@ -87,7 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
           TextButton(
             child: Text('Remove Data Mention'),
             onPressed: () {
-              dataMentions = [];
               setState(() {});
             },
           ),
@@ -103,11 +103,13 @@ class _MyHomePageState extends State<MyHomePage> {
               decoration: InputDecoration(hintText: 'hello'),
               suggestionState: (_) {
                 state = _;
-                setState(() {});
               },
-              contentAfterTheLastTrigger: (_) {
-                c = _;
-                setState(() {});
+              onSearchChanged: (trigger, value) async {
+                dataMentions = [];
+                print('trigger: $trigger, value: $value');
+                await Future.delayed(Duration(seconds: 1));
+                print('Sau khi đợi 1s mới trả kết quả');
+                return await dataMentionsTest;
               },
               mentions: [
                 Mention(

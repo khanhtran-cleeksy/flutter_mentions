@@ -2,7 +2,7 @@ part of flutter_mentions;
 
 enum SuggestionPosition { Top, Bottom }
 
-enum SuggestionState { Ready, Found, NotFound, Invalid, None }
+enum SuggestionState { Ready, Found, NotFound, None }
 
 class LengthMap {
   LengthMap({
@@ -36,7 +36,7 @@ class Mention {
   /// You need to provide two properties `id` & `display` both are [String]
   /// You can also have any custom properties as you like to build custom suggestion
   /// widget.
-   List<Map<String, dynamic>> data;
+  List<Map<String, dynamic>> data;
 
   /// Style for the mention item in Input.
   final TextStyle? style;
@@ -59,6 +59,20 @@ class Mention {
     String? type,
   )? markupBuilder;
 
+  Mention copyWith({
+    List<Map<String, dynamic>>? data
+  }) {
+    return Mention(
+      trigger: trigger,
+      data: data ?? this.data,
+      style: style,
+      matchAll: matchAll,
+      suggestionBuilder: suggestionBuilder,
+      disableMarkup: disableMarkup,
+      markupBuilder: markupBuilder,
+      headerBuilder: headerBuilder,
+    );
+  }
 }
 
 class Annotation {
