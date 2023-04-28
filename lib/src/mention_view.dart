@@ -450,6 +450,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
             // If data is not null then update the data to the mention
             if (mentionDataTemp.isNotEmpty) {
               mention.data = mentionDataTemp;
+
               suggestionListener(isChangeShowSuggestions: true);
             }
           } catch (e) {}
@@ -505,11 +506,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   void setListMention() {
     mention = _selectedMention != null
-        ? widget.mentions
-            .firstWhere(
-                (element) => _selectedMention!.str.contains(element.trigger))
-            .copyWith()
-        : widget.mentions[0].copyWith();
+        ? widget.mentions.firstWhere(
+            (element) => _selectedMention!.str.contains(element.trigger))
+        : widget.mentions[0];
   }
 
   List<Map<String, dynamic>> get data => mention.data.where((element) {
@@ -526,19 +525,10 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller!.mapping = mapToAnnotation();
-    setListMention();
-  }
-
-  @override
-  void didUpdateWidget(widget) {
-    super.didUpdateWidget(widget);
-    setListMention();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Filter the list based on the selection
-    setListMention();
     return Container(
       child: PortalEntry(
         portalAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
