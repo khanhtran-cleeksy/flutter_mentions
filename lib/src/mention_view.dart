@@ -303,6 +303,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 display: e['display'],
                 trigger: element.trigger,
                 type: e['type'] as String?,
+                parentId: e['parentId'] as String?,
                 disableMarkup: element.disableMarkup,
                 markupBuilder: element.markupBuilder,
               )
@@ -312,6 +313,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 display: e['display'],
                 trigger: element.trigger,
                 type: e['type'] as String?,
+                parentId: e['parentId'] as String?,
                 disableMarkup: element.disableMarkup,
                 markupBuilder: element.markupBuilder,
               ),
