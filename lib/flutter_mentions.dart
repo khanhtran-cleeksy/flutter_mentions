@@ -1,6 +1,6 @@
 library flutter_mentions;
 
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

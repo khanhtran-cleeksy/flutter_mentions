@@ -387,8 +387,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
     });
   }
 
+  var _suggestionParam = <String>[];
+
   void suggestionListener({bool isChangeShowSuggestions = false}) {
-    var _suggestionParam = <String>[];
     // Handle for show suggestions
     final cursorPos = controller!.selection.baseOffset;
     if (cursorPos < 0) return;
@@ -433,42 +434,56 @@ class FlutterMentionsState extends State<FlutterMentions> {
     }
   }
 
-  Future<void> suggestionStateListeners({bool skipSearch = false}) async {
+  Timer? searchOnStoppedTyping;
+
+  Future<void> _onChangeHandler() async {
     clearMentionsTemp();
 
     // Get keyword to search
     suggestionListener(isChangeShowSuggestions: widget.onSearchChanged == null);
 
     if (_selectedMention?.str != null) {
-      final str = _selectedMention!.str.toLowerCase();
-      var content = str.substring(1);
-
-      if (content != '') {
-        if (widget.onSearchChanged != null && !skipSearch) {
-          try {
-            final mentionDataTemp =
-                await widget.onSearchChanged!(str[0], content);
-            // If data is not null then update the data to the mention
-            if (mentionDataTemp.isNotEmpty) {
-              mention.data = mentionDataTemp;
-
-              suggestionListener(isChangeShowSuggestions: true);
-            }
-          } catch (e) {}
-        }
+      const duration = Duration(milliseconds: 300);
+      if (searchOnStoppedTyping != null) {
+        searchOnStoppedTyping!.cancel(); // clear timer
       }
-
-      if (data.isNotEmpty) {
-        setSuggestionState = SuggestionState.Found;
-      } else {
-        setSuggestionState = SuggestionState.NotFound;
-      }
+      searchOnStoppedTyping = Timer(
+        duration,
+        () async {
+          if (_selectedMention?.str == null) return;
+          final str = _selectedMention!.str.toLowerCase();
+          var content = str.substring(1);
+          await suggestionStateListeners(str[0], content);
+          if (data.isNotEmpty) {
+            setSuggestionState = SuggestionState.Found;
+          } else {
+            setSuggestionState = SuggestionState.NotFound;
+          }
+        },
+      );
     }
 
     if (widget.suggestionState != null) {
       widget.suggestionState!(suggestionState);
     }
     if (mounted) setState(() {});
+  }
+
+  Future<void> suggestionStateListeners(String trigger, String content) async {
+    if (content != '') {
+      if (widget.onSearchChanged != null) {
+        try {
+          final mentionDataTemp =
+              await widget.onSearchChanged!(trigger, content);
+          // If data is not null then update the data to the mention
+          if (mentionDataTemp.isNotEmpty) {
+            mention.data = mentionDataTemp;
+
+            suggestionListener(isChangeShowSuggestions: true);
+          }
+        } catch (e) {}
+      }
+    }
   }
 
   void inputListener() {
@@ -491,7 +506,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
       controller!.text = widget.defaultText!;
     }
 
-    controller!.addListener(suggestionStateListeners);
+    controller!.addListener(_onChangeHandler);
     controller!.addListener(inputListener);
     initFocusNode();
     super.initState();
@@ -499,7 +514,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void dispose() {
-    controller!.removeListener(suggestionStateListeners);
+    controller!.removeListener(_onChangeHandler);
     controller!.removeListener(inputListener);
     _focusNode.dispose();
     super.dispose();
