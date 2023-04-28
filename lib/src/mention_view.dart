@@ -432,7 +432,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
   }
 
   Future<void> suggestionStateListeners({bool skipSearch = false}) async {
-    print(mention.data.length);
     clearMentionsTemp();
 
     // Get keyword to search
