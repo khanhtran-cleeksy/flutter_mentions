@@ -107,10 +107,6 @@ class _MyHomePageState extends State<MyHomePage> {
               onSearchChanged: (trigger, value) async {
                 dataMentions = [];
                 print('trigger: $trigger, value: $value');
-                await Future.delayed(Duration(seconds: 1));
-                print('Sau khi đợi 1s mới trả kết quả');
-                // dataMentions = dataMentionsTest;
-
                 return await dataMentionsTest;
               },
               mentions: [
