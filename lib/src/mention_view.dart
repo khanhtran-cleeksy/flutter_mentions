@@ -434,7 +434,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
     }
   }
 
-  String? oldText;
   Timer? searchOnStoppedTyping;
 
   Future<void> _onChangeHandler() async {
@@ -444,10 +443,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
     suggestionListener(isChangeShowSuggestions: widget.onSearchChanged == null);
 
     if (_selectedMention?.str != null) {
-      final str = _selectedMention!.str.toLowerCase();
-      var content = str.substring(1);
-      if (oldText == content) return;
-      oldText = content;
       const duration = Duration(milliseconds: 300);
       if (searchOnStoppedTyping != null) {
         searchOnStoppedTyping!.cancel(); // clear timer
@@ -456,6 +451,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
         duration,
         () async {
           if (_selectedMention?.str == null) return;
+          final str = _selectedMention!.str.toLowerCase();
+          var content = str.substring(1);
           await suggestionStateListeners(str[0], content);
           if (data.isNotEmpty) {
             setSuggestionState = SuggestionState.Found;
