@@ -104,20 +104,20 @@ class _MyHomePageState extends State<MyHomePage> {
               suggestionState: (_) {
                 state = _;
               },
-              onSearchChanged: (trigger, value) async {
-                dataMentions = [];
-                print('trigger: $trigger, value: $value');
-                await Future.delayed(Duration(seconds: 1));
-                print('Sau khi đợi 1s mới trả kết quả');
-                return await dataMentionsTest;
-              },
+              // onSearchChanged: (trigger, value) async {
+              //   dataMentions = [];
+              //   print('trigger: $trigger, value: $value');
+              //   await Future.delayed(Duration(seconds: 1));
+              //   print('Sau khi đợi 1s mới trả kết quả');
+              //   return await dataMentionsTest;
+              // },
               mentions: [
                 Mention(
                     trigger: '@',
                     style: TextStyle(
                       color: Colors.amber,
                     ),
-                    data: dataMentions,
+                    data: dataMentionsTest,
                     matchAll: false,
                     suggestionBuilder: (data) {
                       return Container(

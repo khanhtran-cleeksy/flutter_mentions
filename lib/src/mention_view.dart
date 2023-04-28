@@ -340,7 +340,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
     });
 
     final _list = widget.mentions
-        .firstWhere((element) => selectedMention.str.contains(element.trigger));
+        .firstWhere((element) => selectedMention.str.contains(element.trigger))
+        .copyWith();
 
     // find the text by range and replace with the new value.
     controller!.text = controller!.value.text.replaceRange(
@@ -431,6 +432,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   }
 
   Future<void> suggestionStateListeners({bool skipSearch = false}) async {
+    print(mention.data.length);
     clearMentionsTemp();
 
     // Get keyword to search
@@ -482,7 +484,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     final data = mapToAnnotation();
 
     controller = AnnotationEditingController(data);
-
+    setListMention();
     if (widget.defaultText != null) {
       controller!.text = widget.defaultText!;
     }
@@ -503,9 +505,11 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   void setListMention() {
     mention = _selectedMention != null
-        ? widget.mentions.firstWhere(
-            (element) => _selectedMention!.str.contains(element.trigger))
-        : widget.mentions[0];
+        ? widget.mentions
+            .firstWhere(
+                (element) => _selectedMention!.str.contains(element.trigger))
+            .copyWith()
+        : widget.mentions[0].copyWith();
   }
 
   List<Map<String, dynamic>> get data => mention.data.where((element) {
@@ -522,11 +526,13 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller!.mapping = mapToAnnotation();
+    setListMention();
   }
 
   @override
   void didUpdateWidget(widget) {
     super.didUpdateWidget(widget);
+    setListMention();
   }
 
   @override
