@@ -522,7 +522,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller!.mapping = mapToAnnotation();
-    setListMention();
   }
 
   @override
@@ -545,7 +544,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         portal: ValueListenableBuilder(
           valueListenable: showSuggestions,
           builder: (BuildContext context, bool show, Widget? child) {
-            if (hasFocus || true) {
+            if (hasFocus) {
               if (isShowHeader) {
                 return OptionList(
                     margin: widget.suggestionListMargin,
