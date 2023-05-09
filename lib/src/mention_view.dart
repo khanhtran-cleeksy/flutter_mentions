@@ -554,11 +554,19 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   void setMentionTemp() {
     if (widget.mentionsTemp.isNotEmpty) {
-      _mentionsTemp = widget.mentionsTemp;
-    } else {
-      _mentionsTemp = widget.mentions;
+      if (_mentionsTemp.isEmpty) {
+        _mentionsTemp = widget.mentionsTemp;
+      }
+      widget.mentionsTemp.forEach((_) {
+        if (_mentionsTemp.isNotEmpty) {
+          final _mentionTemp =
+              _mentionsTemp.firstWhere((__) => __.trigger == _.trigger);
+
+          _mentionTemp.data = [..._.data, ..._mentionTemp.data];
+        }
+      });
+      controller!.mapping = mapToAnnotation();
     }
-    controller!.mapping = mapToAnnotation();
   }
 
   @override
