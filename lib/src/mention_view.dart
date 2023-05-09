@@ -421,8 +421,10 @@ class FlutterMentionsState extends State<FlutterMentions> {
       return false;
     });
 
-    if (_suggestionParam.length == 2 && _suggestionParam[1] == '') {
-      setSuggestionState = SuggestionState.Ready;
+    if (_suggestionParam.length == 2) {
+      if (_suggestionParam[1] == '') {
+        setSuggestionState = SuggestionState.Ready;
+      }
     } else {
       setSuggestionState = SuggestionState.None;
     }
@@ -452,8 +454,17 @@ class FlutterMentionsState extends State<FlutterMentions> {
         () async {
           if (_selectedMention?.str == null) return;
           final str = _selectedMention!.str.toLowerCase();
-          var content = str.substring(1);
+          var content = str.length == 1 ? '' : str.substring(1);
           await suggestionStateListeners(str[0], content);
+          data = mention.data.where((element) {
+            final ele = element['display'].toLowerCase();
+            if (_selectedMention == null) return false;
+            final str = _selectedMention!.str
+                .toLowerCase()
+                .replaceAll(RegExp(_pattern), '');
+
+            return ele == str ? false : ele.contains(str);
+          }).toList();
           if (data.isNotEmpty) {
             setSuggestionState = SuggestionState.Found;
           } else {
@@ -470,19 +481,16 @@ class FlutterMentionsState extends State<FlutterMentions> {
   }
 
   Future<void> suggestionStateListeners(String trigger, String content) async {
-    if (content != '') {
-      if (widget.onSearchChanged != null) {
-        try {
-          final mentionDataTemp =
-              await widget.onSearchChanged!(trigger, content);
-          // If data is not null then update the data to the mention
-          if (mentionDataTemp.isNotEmpty) {
-            mention.data = mentionDataTemp;
+    if (widget.onSearchChanged != null) {
+      try {
+        final mentionDataTemp = await widget.onSearchChanged!(trigger, content);
+        // If data is not null then update the data to the mention
+        if (mentionDataTemp.isNotEmpty) {
+          mention.data = mentionDataTemp;
 
-            suggestionListener(isChangeShowSuggestions: true);
-          }
-        } catch (e) {}
-      }
+          suggestionListener(isChangeShowSuggestions: true);
+        }
+      } catch (e) {}
     }
   }
 
@@ -527,15 +535,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         : widget.mentions[0];
   }
 
-  List<Map<String, dynamic>> get data => mention.data.where((element) {
-        final ele = element['display'].toLowerCase();
-        if (_selectedMention == null) return false;
-        final str = _selectedMention!.str
-            .toLowerCase()
-            .replaceAll(RegExp(_pattern), '');
-
-        return ele == str ? false : ele.contains(str);
-      }).toList();
+  List<Map<String, dynamic>> data = [];
 
   @override
   void didChangeDependencies() {
@@ -553,45 +553,29 @@ class FlutterMentionsState extends State<FlutterMentions> {
         childAnchor: widget.suggestionPosition == SuggestionPosition.Bottom
             ? Alignment.bottomCenter
             : Alignment.topCenter,
-        portal: ValueListenableBuilder(
-          valueListenable: showSuggestions,
-          builder: (BuildContext context, bool show, Widget? child) {
-            if (hasFocus) {
-              if (isShowHeader) {
-                return OptionList(
-                    margin: widget.suggestionListMargin,
-                    suggestionListHeight: widget.suggestionListHeight,
-                    suggestionListDecoration: widget.suggestionListDecoration,
-                    data: [],
-                    headerBuilder: mention.headerBuilder,
-                    header: widget.textCustomHeader != null
+        portal: hasFocus && suggestionState != SuggestionState.None
+            ? OptionList(
+                margin: widget.suggestionListMargin,
+                suggestionListHeight: widget.suggestionListHeight,
+                suggestionListDecoration: widget.suggestionListDecoration,
+                suggestionBuilder: mention.suggestionBuilder,
+                data: suggestionState != SuggestionState.Ready ? data : [],
+                headerBuilder: mention.headerBuilder,
+                onTap: (value) {
+                  addMention(value, mention);
+                  showSuggestions.value = false;
+                },
+                header: isShowHeader
+                    ? widget.textCustomHeader != null
                         ? widget.textCustomHeader!
                         : isShowDefaultHeader
                             ? widget.textDefaultHeader ?? 'Nhắc đến thành viên'
                             : isShowNotFoundHeader
                                 ? widget.textNotFoundHeader ??
                                     'Không tìm thấy kết quả nào'
-                                : '');
-              }
-
-              if (show) {
-                return OptionList(
-                  margin: widget.suggestionListMargin,
-                  suggestionListHeight: widget.suggestionListHeight,
-                  suggestionBuilder: mention.suggestionBuilder,
-                  suggestionListDecoration: widget.suggestionListDecoration,
-                  data: data,
-                  onTap: (value) {
-                    addMention(value, mention);
-                    showSuggestions.value = false;
-                  },
-                );
-              }
-            }
-
-            return Container();
-          },
-        ),
+                                : null
+                    : null)
+            : SizedBox(),
         child: Row(
           children: [
             ...widget.leading,
