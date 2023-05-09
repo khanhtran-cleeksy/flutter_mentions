@@ -53,6 +53,7 @@ class FlutterMentions extends StatefulWidget {
     this.textCustomHeader,
     this.textDefaultHeader,
     this.textNotFoundHeader,
+    this.mentionsTemp = const [],
   }) : super(key: key);
 
   /// default text for the Mention Input.
@@ -60,6 +61,7 @@ class FlutterMentions extends StatefulWidget {
 
   /// List of Mention that the user is allowed to triggered
   List<Mention> mentions;
+  List<Mention> mentionsTemp;
 
   /// Leading widgets to show before teh Input box, helps preseve the size
   /// size for the Portal widget size.
@@ -258,7 +260,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   LengthMap? _selectedMention;
   String _pattern = '';
   late Mention mention;
-  final List<Mention> _mentionsTemp = [];
+  List<Mention> _mentionsTemp = [];
   late FocusNode _focusNode;
   bool hasFocus = false;
 
@@ -349,7 +351,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller!.text = controller!.value.text.replaceRange(
       selectedMention.start,
       selectedMention.end,
-      "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
+      "☑${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
     );
 
     if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
@@ -506,6 +508,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
+    _mentionsTemp = widget.mentionsTemp;
     final data = mapToAnnotation();
 
     controller = AnnotationEditingController(data);
