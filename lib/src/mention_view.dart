@@ -456,7 +456,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
         () async {
           if (_selectedMention?.str == null) return;
           final str = _selectedMention!.str.toLowerCase();
-          var content = str.substring(1);
+          var content = str.length == 1 ? '' : str.substring(1);
           await suggestionStateListeners(str[0], content);
           data = mention.data.where((element) {
             final ele = element['display'].toLowerCase();
