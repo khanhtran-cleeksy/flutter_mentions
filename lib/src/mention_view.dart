@@ -563,7 +563,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 suggestionListHeight: widget.suggestionListHeight,
                 suggestionListDecoration: widget.suggestionListDecoration,
                 suggestionBuilder: mention.suggestionBuilder,
-                data: data,
+                data: suggestionState != SuggestionState.Ready ? data : [],
                 headerBuilder: mention.headerBuilder,
                 onTap: (value) {
                   addMention(value, mention);
