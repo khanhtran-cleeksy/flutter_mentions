@@ -543,7 +543,10 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     controller!.mapping = mapToAnnotation();
-    if (widget.mentionsTemp.isNotEmpty) _mentionsTemp = widget.mentionsTemp;
+    if (widget.mentionsTemp.isNotEmpty){{
+      _mentionsTemp = widget.mentionsTemp;
+      controller!.mapping = mapToAnnotation();
+    }} 
   }
 
   @override
