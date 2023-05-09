@@ -270,8 +270,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     });
   }
 
-  bool get isShowDefaultHeader =>
-      suggestionState == SuggestionState.Ready;
+  bool get isShowDefaultHeader => suggestionState == SuggestionState.Ready;
   bool get isShowNotFoundHeader => suggestionState == SuggestionState.NotFound;
 
   bool get isShowHeader =>
@@ -486,19 +485,16 @@ class FlutterMentionsState extends State<FlutterMentions> {
   }
 
   Future<void> suggestionStateListeners(String trigger, String content) async {
-    if (content != '') {
-      if (widget.onSearchChanged != null) {
-        try {
-          final mentionDataTemp =
-              await widget.onSearchChanged!(trigger, content);
-          // If data is not null then update the data to the mention
-          if (mentionDataTemp.isNotEmpty) {
-            mention.data = mentionDataTemp;
+    if (widget.onSearchChanged != null) {
+      try {
+        final mentionDataTemp = await widget.onSearchChanged!(trigger, content);
+        // If data is not null then update the data to the mention
+        if (mentionDataTemp.isNotEmpty) {
+          mention.data = mentionDataTemp;
 
-            suggestionListener(isChangeShowSuggestions: true);
-          }
-        } catch (e) {}
-      }
+          suggestionListener(isChangeShowSuggestions: true);
+        }
+      } catch (e) {}
     }
   }
 
