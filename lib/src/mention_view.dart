@@ -423,11 +423,9 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
     if (_suggestionParam.length == 2) {
       if (_suggestionParam[1] == '') {
-        print(SuggestionState.Ready);
         setSuggestionState = SuggestionState.Ready;
       }
     } else {
-      print(SuggestionState.None);
       setSuggestionState = SuggestionState.None;
     }
     _selectedMention = val == -1 ? null : lengthMap[val];
@@ -468,10 +466,8 @@ class FlutterMentionsState extends State<FlutterMentions> {
             return ele == str ? false : ele.contains(str);
           }).toList();
           if (data.isNotEmpty) {
-            print(SuggestionState.Found);
             setSuggestionState = SuggestionState.Found;
           } else {
-            print(SuggestionState.NotFound);
             setSuggestionState = SuggestionState.NotFound;
           }
         },
