@@ -351,7 +351,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller!.text = controller!.value.text.replaceRange(
       selectedMention.start,
       selectedMention.end,
-      "☑${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
+      "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
     );
 
     if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
@@ -508,7 +508,6 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   @override
   void initState() {
-    _mentionsTemp = widget.mentionsTemp;
     final data = mapToAnnotation();
 
     controller = AnnotationEditingController(data);
