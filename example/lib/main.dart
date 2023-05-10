@@ -34,8 +34,17 @@ class _MyHomePageState extends State<MyHomePage> {
   SuggestionState state = SuggestionState.None;
   String? c = '';
   String? markupText = '';
-  List<Map<String, dynamic>> dataMentions = [];
-  List<Map<String, dynamic>> dataMentionsTest = [
+  bool dataMentionTempTurnOn = true;
+  List<Map<String, dynamic>> dataMentionsTemp = [
+    {
+      'id': '61as61fsa',
+      'display': 'Long T1',
+      'full_name': 'Fayeed Pawaskar',
+      'photo':
+          'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
+    },
+  ];
+  List<Map<String, dynamic>> dataMentions = [
     {
       'id': '61as61fsa',
       'display': 'Long T1',
@@ -75,20 +84,20 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          Text(state.name),
-          Text('Content: $c'),
           TextButton(
-            child: Text('Get Text'),
+            child: Text('Data Mention Temp status: $dataMentionTempTurnOn'),
             onPressed: () {
-              // markupText = key.currentState!.controller!.markupText;
-              setState(() {});
+              setState(() {
+                dataMentionTempTurnOn = !dataMentionTempTurnOn;
+              });
             },
           ),
-          Text('Markup Text: $markupText'),
           TextButton(
-            child: Text('Remove Data Mention'),
+            child: Text('Remove Data Mention: ${dataMentions.length}'),
             onPressed: () {
-              setState(() {});
+              setState(() {
+                dataMentions = [];
+              });
             },
           ),
           Container(
@@ -96,18 +105,28 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Container(
             child: FlutterMentions(
+              mentionsTemp: dataMentionTempTurnOn
+                  ? [
+                      Mention(
+                        trigger: '@',
+                        style: TextStyle(
+                          color: Colors.red,
+                        ),
+                        data: dataMentionsTemp,
+                        matchAll: false,
+                      ),
+                    ]
+                  : [],
               key: key,
               suggestionPosition: SuggestionPosition.Top,
               maxLines: 5,
               minLines: 1,
-              decoration: InputDecoration(hintText: 'hello'),
+              decoration: InputDecoration(hintText: 'Hello world'),
               suggestionState: (_) {
                 state = _;
               },
               onSearchChanged: (trigger, value) async {
-                dataMentions = [];
-                print('trigger: $trigger, value: $value');
-                return await dataMentionsTest;
+                return await dataMentions;
               },
               mentions: [
                 Mention(
