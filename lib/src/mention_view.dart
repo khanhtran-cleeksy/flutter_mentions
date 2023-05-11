@@ -465,7 +465,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
                 .toLowerCase()
                 .replaceAll(RegExp(_pattern), '');
 
-            return ele == str ? false : ele.contains(str);
+            return ele.contains(str);
           }).toList();
           if (data.isNotEmpty) {
             setSuggestionState = SuggestionState.Found;
