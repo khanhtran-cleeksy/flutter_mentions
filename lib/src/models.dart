@@ -58,7 +58,6 @@ class Mention {
     String value,
     String? type,
     String? parentId,
-    String? parentName,
   )? markupBuilder;
 
   Mention copyWith({List<Map<String, dynamic>>? data}) {
@@ -85,7 +84,6 @@ class Annotation {
     this.markupBuilder,
     this.type,
     this.parentId,
-    this.parentName,
   });
 
   TextStyle? style;
@@ -95,14 +93,6 @@ class Annotation {
   bool disableMarkup;
   String? type;
   String? parentId;
-  String? parentName;
-
-  final String Function(
-    String trigger,
-    String mention,
-    String value,
-    String? type,
-    String? parentId,
-    String? parentName,
-  )? markupBuilder;
+  final String Function(String trigger, String mention, String value,
+      String? type, String? parentId)? markupBuilder;
 }
