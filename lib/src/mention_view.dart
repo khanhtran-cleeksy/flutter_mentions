@@ -382,13 +382,15 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
   void initFocusNode() {
     _focusNode = widget.focusNode ?? FocusNode();
-    _focusNode.addListener(() {
-      if (mounted) {
-        setState(() {
-          hasFocus = _focusNode.hasFocus;
-        });
-      }
-    });
+    _focusNode.addListener(_setFocus);
+  }
+
+  void _setFocus() {
+    if (mounted) {
+      setState(() {
+        hasFocus = _focusNode.hasFocus;
+      });
+    }
   }
 
   var _suggestionParam = <String>[];
@@ -528,7 +530,11 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void dispose() {
     controller!.removeListener(_onChangeHandler);
     controller!.removeListener(inputListener);
-    _focusNode.dispose();
+    if (widget.focusNode != null) {
+      _focusNode.removeListener(_setFocus);
+      _focusNode.dispose();
+    }
+
     super.dispose();
   }
 
@@ -544,14 +550,12 @@ class FlutterMentionsState extends State<FlutterMentions> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    initFocusNode();
     setMentionTemp();
   }
 
   @override
   void didUpdateWidget(FlutterMentions oldWidget) {
     super.didUpdateWidget(oldWidget);
-    initFocusNode();
     setMentionTemp();
   }
 
