@@ -526,7 +526,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
   void dispose() {
     controller!.removeListener(_onChangeHandler);
     controller!.removeListener(inputListener);
-    _focusNode.dispose();
+
     super.dispose();
   }
 
