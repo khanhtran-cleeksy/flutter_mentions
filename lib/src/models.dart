@@ -54,7 +54,7 @@ class Mention {
   /// Allows to set custom markup for the mentioned item.
   final String Function(
     String trigger,
-    String mention,
+    int mention,
     String value,
     String? type,
     String? parentId,
@@ -87,12 +87,12 @@ class Annotation {
   });
 
   TextStyle? style;
-  String? id;
+  int? id;
   String? display;
   String trigger;
   bool disableMarkup;
   String? type;
   String? parentId;
-  final String Function(String trigger, String mention, String value,
-      String? type, String? parentId)? markupBuilder;
+  final String Function(String trigger, int mention, String value, String? type,
+      String? parentId)? markupBuilder;
 }
