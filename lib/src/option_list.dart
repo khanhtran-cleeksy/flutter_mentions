@@ -52,7 +52,7 @@ class OptionList extends StatelessWidget {
                                 color: Colors.blue,
                                 padding: EdgeInsets.all(20.0),
                                 child: Text(
-                                  data[index]['display'],
+                                  data[index]['title'],
                                   style: TextStyle(fontSize: 12),
                                 ),
                               ),

@@ -298,11 +298,11 @@ class FlutterMentionsState extends State<FlutterMentions> {
       }
 
       element.data.forEach(
-        (e) => data["${element.trigger}${e['display']}"] = e['style'] != null
+        (e) => data["${element.trigger}${e['title']}"] = e['style'] != null
             ? Annotation(
                 style: e['style'],
                 id: e['id'],
-                display: e['display'],
+                display: e['title'],
                 trigger: element.trigger,
                 type: e['type'] as String?,
                 parentId: e['parentId'] as String?,
@@ -312,7 +312,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
             : Annotation(
                 style: element.style,
                 id: e['id'],
-                display: e['display'],
+                display: e['title'],
                 trigger: element.trigger,
                 type: e['type'] as String?,
                 parentId: e['parentId'] as String?,
@@ -329,7 +329,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     _mentionsTemp.forEach((m) {
       m.data = m.data.where(
         (d) {
-          return controller!.text.contains('${m.trigger}${d['display']}');
+          return controller!.text.contains('${m.trigger}${d['title']}');
         },
       ).toList();
     });
@@ -351,7 +351,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
     controller!.text = controller!.value.text.replaceRange(
       selectedMention.start,
       selectedMention.end,
-      "${_list.trigger}${value['display']}${widget.appendSpaceOnAdd ? ' ' : ''}",
+      "${_list.trigger}${value['title']}${widget.appendSpaceOnAdd ? ' ' : ''}",
     );
 
     if (widget.onMentionAdd != null) widget.onMentionAdd!(value);
@@ -374,7 +374,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
 
     // Move the cursor to next position after the new mentioned item.
     var nextCursorPosition =
-        selectedMention.start + 1 + value['display']?.length as int? ?? 0;
+        selectedMention.start + 1 + value['title']?.length as int? ?? 0;
     if (widget.appendSpaceOnAdd) nextCursorPosition++;
     controller!.selection =
         TextSelection.fromPosition(TextPosition(offset: nextCursorPosition));
@@ -463,7 +463,7 @@ class FlutterMentionsState extends State<FlutterMentions> {
           var content = str.length == 1 ? '' : str.substring(1);
           await suggestionStateListeners(str[0], content);
           data = mention.data.where((element) {
-            final ele = element['display'].toLowerCase();
+            final ele = element['title'].toLowerCase();
             if (_selectedMention == null) return false;
             final str = _selectedMention!.str
                 .toLowerCase()

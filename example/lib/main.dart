@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Map<String, dynamic>> dataMentionsTemp = [
     {
       'id': '61as61fsa',
-      'display': 'Long T1',
+      'title': 'Long T1',
       'full_name': 'Fayeed Pawaskar',
       'photo':
           'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
@@ -47,14 +47,14 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Map<String, dynamic>> dataMentions = [
     {
       'id': '61as61fsa',
-      'display': 'Long T1',
+      'title': 'Long T1',
       'full_name': 'Fayeed Pawaskar',
       'photo':
           'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
     },
     {
       'id': '61asasgasgsag6a',
-      'display': 'Khải T2',
+      'title': 'Khải T2',
       'full_name': 'khaled',
       'style': TextStyle(color: Colors.purple),
       'photo':
@@ -62,14 +62,14 @@ class _MyHomePageState extends State<MyHomePage> {
     },
     {
       'id': 'asfgasga41',
-      'display': 'Sang T3',
+      'title': 'Sang T3',
       'full_name': 'Mark Twain',
       'photo':
           'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
     },
     {
       'id': 'asfsaf451a',
-      'display': 'Nguyệt T4',
+      'title': 'Nguyệt T4',
       'full_name': 'Jhon Legend',
       'photo':
           'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'
@@ -152,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Column(
                               children: <Widget>[
                                 Text(data['full_name']),
-                                Text('@${data['display']}'),
+                                Text('@${data['title']}'),
                               ],
                             )
                           ],
@@ -166,8 +166,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.blue,
                   ),
                   data: [
-                    {'id': 'reactjs', 'display': 'reactjs'},
-                    {'id': 'javascript', 'display': 'javascript'},
+                    {'id': 'reactjs', 'title': 'reactjs'},
+                    {'id': 'javascript', 'title': 'javascript'},
                   ],
                   matchAll: true,
                 )
